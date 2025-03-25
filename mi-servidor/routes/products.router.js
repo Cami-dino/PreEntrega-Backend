@@ -1,31 +1,30 @@
 const express = require('express');
-const ProductManager = require('../managers/ProductManager');
+const Product = require('../models/Product');
 const router = express.Router();
-const productManager = new ProductManager();
 
-router.get('/', async (req, res) => {
-    const products = await productManager.getProducts();
-    res.json(products);
-});
 
-router.get('/:pid', async (req, res) => {
-    const product = await productManager.getProductById(req.params.pid);
-    product ? res.json(product) : res.status(404).send('Producto no encontrado');
-});
+router.get('/', async (req, res, next) => {
+    try {
+        const { limit = 10, page = 1, sort, query } = req.query;
+        const options = { page: parseInt(page), limit: parseInt(limit), sort: sort === 'asc' ? { price: 1 } : sort === 'desc' ? { price: -1 } : {} };
+        const filter = query ? { $or: [{ category: query }, { status: query === 'true' }] } : {};
 
-router.post('/', async (req, res) => {
-    const newProduct = await productManager.addProduct(req.body);
-    res.status(201).json(newProduct);
-});
-
-router.put('/:pid', async (req, res) => {
-    const updatedProduct = await productManager.updateProduct(req.params.pid, req.body);
-    updatedProduct ? res.json(updatedProduct) : res.status(404).send('Producto no encontrado');
-});
-
-router.delete('/:pid', async (req, res) => {
-    await productManager.deleteProduct(req.params.pid);
-    res.status(204).send();
+        const result = await Product.paginate(filter, options);
+        res.json({
+            status: 'success',
+            payload: result.docs,
+            totalPages: result.totalPages,
+            prevPage: result.prevPage,
+            nextPage: result.nextPage,
+            page: result.page,
+            hasPrevPage: result.hasPrevPage,
+            hasNextPage: result.hasNextPage,
+            prevLink: result.hasPrevPage ? `/api/products?page=${result.prevPage}&limit=${limit}&sort=${sort}&query=${query}` : null,
+            nextLink: result.hasNextPage ? `/api/products?page=${result.nextPage}&limit=${limit}&sort=${sort}&query=${query}` : null
+        });
+    } catch (err) {
+        next(err);
+    }
 });
 
 module.exports = router;

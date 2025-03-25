@@ -1,39 +1,19 @@
+import { Server } from "socket.io";
 
-const express = require('express');
-const { createServer } = require('http');
-const { Server } = require('socket.io');
-const mongoose = require('mongoose');
-const { engine } = require('express-handlebars');
-const path = require('path');
+const io = new Server(server);
 
-const app = express();
-const httpServer = createServer(app);
-const io = new Server(httpServer);
+io.on("connection", (socket) => {
+  console.log("Cliente conectado");
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+  socket.on("productoNuevo", (producto) => {
+    io.emit("actualizarProductos", producto);
+  });
 
-// Conectar a MongoDB
-mongoose.connect('mongodb://127.0.0.1:27017/ecommerce', { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => console.log('🟢 Conectado a MongoDB'))
-    .catch(err => console.error('🔴 Error al conectar a MongoDB:', err));
+  socket.on("productoEliminado", (id) => {
+    io.emit("eliminarProducto", id);
+  });
 
-// Configurar Handlebars
-app.engine('handlebars', engine());
-app.set('view engine', 'handlebars');
-app.set('views', path.join(__dirname, 'views'));
-
-// Rutas
-const productsRouter = require('./routes/products.router');
-const cartsRouter = require('./routes/carts.router');
-const viewsRouter = require('./routes/views.router');
-
-app.use('/api/products', productsRouter);
-app.use('/api/carts', cartsRouter);
-app.use('/', viewsRouter);
-
-const PORT = 8080;
-httpServer.listen(PORT, () => {
-    console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+  socket.on("productoAgregadoAlCarrito", (producto) => {
+    io.emit("actualizarCarrito", producto);
+  });
 });
