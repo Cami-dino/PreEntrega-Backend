@@ -1,10 +1,8 @@
-const socket = io();
-
-socket.on("actualizarProductos", (producto) => {
-  const lista = document.getElementById("lista-productos");
-  lista.innerHTML += `<li>${producto.title} - $${producto.price}</li>`;
-});
-
-socket.on("eliminarProducto", (id) => {
-  document.getElementById(`producto-${id}`).remove();
-});
+<h1>Productos en Tiempo Real</h1>
+<ul id="lista-productos"></ul>
+<script>
+  const socket = io();
+  socket.on("actualizarProductos", producto => {
+    document.getElementById("lista-productos").innerHTML += `<li>${producto.title} - $${producto.price}</li>`;
+  });
+</script>
