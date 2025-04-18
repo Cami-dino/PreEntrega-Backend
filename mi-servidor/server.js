@@ -15,7 +15,27 @@ import { errorHandler } from "./middlewares/errorHandler.js";
 app.use(errorHandler);
 import paymentsRouter from "./routes/payments.js";
 app.use("/api/payments", paymentsRouter);
+import { errorHandler } from "./middlewares/errorHandler.js";
+app.use(errorHandler);
+import session from "express-session";
+import MongoStore from "connect-mongo";
 
+app.use(session({
+  secret: "tuClaveUltraSecreta123",
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGO_URI,
+    ttl: 3600
+  })
+}));
+
+router.post("/", uploader.array("thumbnails", 5), async (req, res) => {
+  const thumbnails = req.files.map(f => `/img/${f.filename}`);
+  const newProduct = { ...req.body, thumbnails };
+  const saved = await Product.create(newProduct);
+  res.json(saved);
+});
 
 dotenv.config();
 const app = express();

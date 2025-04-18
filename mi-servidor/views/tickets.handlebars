@@ -1,0 +1,8 @@
+<h1>Tickets de Compra</h1>
+<ul>
+  {{#each tickets}}
+    <li>
+      <strong>{{this.code}}</strong> - Total: ${{this.amount}} - Comprador: {{this.purchaser}} - Fecha: {{this.purchase_datetime}}
+    </li>
+  {{/each}}
+</ul>
