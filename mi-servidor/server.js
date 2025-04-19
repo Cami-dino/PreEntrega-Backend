@@ -7,8 +7,7 @@ import handlebars from "express-handlebars";
 import path from "path";
 import productsRouter from "./routes/products.js";
 import cartsRouter from "./routes/carts.js";
-import authRouter from "./routes/auth.js";
-import viewsRouter from "./routes/views.js";
+import viewsRouter from "./routes/views.router.js";
 import authRouter from "./routes/auth.js";
 app.use("/auth", authRouter);
 import { errorHandler } from "./middlewares/errorHandler.js";
@@ -38,9 +37,9 @@ router.post("/", uploader.array("thumbnails", 5), async (req, res) => {
 });
 
 dotenv.config();
-const app = express();
-const httpServer = createServer(app);
-const io = new Server(httpServer);
+import app from express();
+import httpServer from createServer(app);
+import io from new Server(httpServer);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
